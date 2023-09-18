@@ -1,11 +1,30 @@
 from django.db import models
+from django.dispatch import receiver
+from django.shortcuts import get_object_or_404
 
 from djchat import settings
+
+
+def category_icon_path(instance, filename):
+    return f"category/{instance.name}/icon/{filename}"
 
 
 class Category(models.Model):
     name = models.CharField(max_length=50)
     description = models.TextField(blank=True, null=True)
+    icon = models.FileField(
+        upload_to=category_icon_path, null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if self.id:
+            category = get_object_or_404(Category, id=self.id)
+            if category.icon != self.icon:
+                category.icon.delete(save=False)
+        super(Category, self).save(*args, **kwargs)
+
+    @receiver(models.signals.post_delete, sender='server.Category')
+    def delete_category_icon(sender, instance, **kwargs):
+        instance.icon.delete(save=False)
 
     def __str__(self) -> str:
         return self.name
