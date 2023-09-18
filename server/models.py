@@ -30,7 +30,7 @@ class Channel(models.Model):
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='channel_owner')
     topic = models.CharField(max_length=50)
     server = models.ForeignKey(
-        Server, on_delete=models.CASCADE, related_name="channel_server")
+        Server, on_delete=models.CASCADE, related_name="channels")
 
     def save(self, *args, **kwargs):
         self.name = self.name.lower()
